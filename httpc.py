@@ -148,7 +148,33 @@ else:
         redirect = req.redirect(response.decode("utf-8"))
         if redirect is not None:
             print("Redirect location:", redirect)
+            url_parts = urlparse(redirect)
+            host = "www." + url_parts.netloc
+            url_path = url_parts.path
+            req = libhttp.HttpRequest(method=method, url=url_path)
 
+            # Add headers
+            req.add_header("Host", host)
+            if "headers" in args:
+                headers = dict([match.split(':', 1) for match in args.headers])
+                for key in headers:
+                    req.add_header(key, headers[key])
+
+            # Append inline data or file only for POST method
+            if "data" in args:
+                req.add_header("Content-Type", "application/json")
+                req.set_data_inline(args.data)
+            elif "file" in args:
+                req.set_data_file(args.file)
+
+            # Open TCP socket and send the HTTP request
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                sock.connect((host, 80))
+                sock.sendall(req.to_string())
+                response = sock.recv(4096)
+            finally:
+                sock.close()
 
         # Check verbose option
         response_parts = response.decode("utf-8").split("\r\n\r\n")
