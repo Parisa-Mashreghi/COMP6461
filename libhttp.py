@@ -1,9 +1,9 @@
-from nis import match
 from operator import methodcaller
 import socket
 import argparse
 import sys
 import enum
+
 
 class Method(enum.Enum):
     UNKNOWN = 0
@@ -37,6 +37,19 @@ class HttpRequest:
         finally:
             f.close()
 
+    def redirect(self, response):
+        resp = response
+        head = resp.split("\r\n")
+        check = int(head[0].split(" ")[1])
+        if 299 < check < 400:
+            for headers in head:
+                if "Location: " in headers:
+                    location = headers.split("Location: ")[1]
+            if location:
+                return location
+            else:
+                return None
+
     def to_string(self):
         cr = "\r\n"
         # Add method
@@ -47,7 +60,7 @@ class HttpRequest:
             s1 = "POST"
         else:
             s1 = "GET"
-        
+
         # Add URI
         s2 = self.url
 
@@ -86,13 +99,3 @@ def run_client(host, port):
         print(response.decode("utf-8"))
     finally:
         sock.close()
-
-
-# Usage: python echoclient.py --host host --port port
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--host", help="server host", default="www.httpbin.org")
-# parser.add_argument("--port", help="server port", type=int, default=80)
-# args = parser.parse_args()
-# run_client(args.host, args.port)
-
-
