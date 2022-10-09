@@ -1,8 +1,8 @@
 from operator import methodcaller
 import socket
-import argparse
 import sys
 import enum
+from urllib.parse import urlparse
 
 
 class Method(enum.Enum):
@@ -13,16 +13,23 @@ class Method(enum.Enum):
 
 class HttpRequest:
     def __init__(self, method, url):
+        url_parts = urlparse(url)
+        host = "www." + url_parts.netloc
+        path = url_parts.path
+        self.host = host
+        self.path = path
         self.method = method
-        self.url = url
         self.headers = {}
         self.data = ""
 
     def set_method(self, method):
         self.method = method
 
-    def set_url(self, url):
-        self.url = url
+    def set_host(self, host):
+        self.host = host
+
+    def set_path(self, path):
+        self.path = path
 
     def add_header(self, key, val):
         self.headers[key] = val
@@ -31,26 +38,24 @@ class HttpRequest:
         self.data = data
 
     def set_data_file(self, filename):
-        try:
-            f = open(filename, "rb")
+        with open(filename, "r") as f:
             self.data = f.read()
-        finally:
-            f.close()
 
-    def redirect(self, response):
-        resp = response
-        head = resp.split("\r\n")
-        check = int(head[0].split(" ")[1])
-        if 299 < check < 400:
-            for headers in head:
-                if "Location: " in headers:
-                    location = headers.split("Location: ")[1]
-            if location:
-                return location
-            else:
-                return None
+    def check_redirection(self, response):
+        hdrs = response.decode("utf-8").split("\r\n\r\n")[-2].split("\r\n")     # Extract the headers of the response
+        check = int(hdrs[0].split(" ")[1])        # Extract the HTTP status code from the first header
+        if 299 < check < 400:                     # A status code between 300 and 399 is recognized redirection response
+            location = ""
+            for hdr in hdrs:
+                hdr = hdr.lower()
+                if "location:" in hdr:
+                    location = hdr.split("location: ")[1].strip()
+            if location != "":
+                self.path = location
+                return True
+        return False
 
-    def to_string(self):
+    def to_bytearray(self):
         cr = "\r\n"
         # Add method
         s1 = ""
@@ -61,13 +66,14 @@ class HttpRequest:
         else:
             s1 = "GET"
 
-        # Add URI
-        s2 = self.url
+        # Add path
+        s2 = self.path
 
         # Add HTTP version
-        s3 = "HTTP/1.1"
+        s3 = "HTTP/1.0"
 
         # Add headers
+        self.add_header("Host", self.host)
         if len(self.data.strip()) != 0:
             self.add_header("Content-Length", len(self.data))
         s4 = ""
@@ -79,23 +85,4 @@ class HttpRequest:
 
         # Construct the request
         req = f"{s1} {s2} {s3} {s4} {s5}"
-
-        print(req)
         return bytearray(req, "ascii")
-
-
-def run_client(host, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        sock.connect((host, port))
-
-        url = "/get?course=networking&assignment=1"
-        req = HttpRequest(Method.GET, url)
-        req.add_header("Host", host)
-        req.add_header("Content-Type", "application/json")
-        req.set_data_inline("{ \"Greeting\": \"Hello\" }")
-        sock.sendall(req.to_string())
-        response = sock.recv(4096, socket.MSG_WAITALL)
-        print(response.decode("utf-8"))
-    finally:
-        sock.close()
