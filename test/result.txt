@@ -1,0 +1,22 @@
+
+------------------------------------------------------------------------------------
+[1] python3 httpc.py post -h "Content-Type: application/json" -v -d "{"Assignment": 1}" "http://httpbin.org/post"
+POST /post HTTP/1.0 
+HTTP/1.1 200 OK
+------------------------------------------------------------------------------------
+[2] python3 httpc.py post -v -h "Content-Type: application/json" -f "data.json" "http://httpbin.org/post"
+POST /post HTTP/1.0 
+HTTP/1.1 200 OK
+------------------------------------------------------------------------------------
+[3] python3 httpc.py get -v "http://httpbin.org/get?course=networking&assignment=1"
+GET /get HTTP/1.0 
+HTTP/1.1 200 OK
+------------------------------------------------------------------------------------
+[4] python3 httpc.py get -v -o out.txt "http://httpbin.org/status/301"
+GET /status/301 HTTP/1.0 
+HTTP/1.1 301 MOVED PERMANENTLY
+GET /redirect/1 HTTP/1.0 
+HTTP/1.1 302 FOUND
+GET /get HTTP/1.0 
+HTTP/1.1 200 OK
+------------------------------------------------------------------------------------
