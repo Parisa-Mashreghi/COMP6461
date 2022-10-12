@@ -15,7 +15,7 @@ class HttpRequest:
     def __init__(self, method, url):
         url_parts = urlparse(url)
         host = "www." + url_parts.netloc
-        path = url_parts.path
+        path = url_parts.path + "?" + url_parts.query
         self.host = host
         self.path = path
         self.method = method

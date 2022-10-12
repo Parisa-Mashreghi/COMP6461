@@ -22,7 +22,7 @@ def create_parser():
                                        add_help=False,
                                        description="GET http method")
     parser_get.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true", default=False, required=False)
-    parser_get.add_argument("-h", "--header", nargs='*', help="Header", type=str, default="")
+    parser_get.add_argument("-h", "--headers", nargs='*', help="Header", type=str, default="")
     parser_get.add_argument("-o", "--out", help="Output", type=str, default="")
     parser_get.add_argument("URL", help="HTTP url")
     parser_get.set_defaults(command="get")
