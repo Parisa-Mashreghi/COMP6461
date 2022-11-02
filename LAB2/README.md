@@ -1,0 +1,16 @@
+usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL 
+
+Post executes a HTTP POST request for a given URL with inline data or from file. 
+    -v Prints the detail of the response such as protocol, status, and headers. 
+    -h key:value Associates headers to HTTP Request with the format 'key:value'. 
+    -d string Associates an inline data to the body HTTP POST request. 
+    -f file Associates the content of a file to the body HTTP POST request. 
+
+Either [-d] or [-f] can be used but not both.
+
+
+usage: httpc get [-v] [-h key:value] URL 
+
+Get executes a HTTP GET request for a given URL. 
+    -v Prints the detail of the response such as protocol, status, and headers. 
+    -h key:value Associates headers to HTTP Request with the format 'key:value'.
