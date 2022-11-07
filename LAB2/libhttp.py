@@ -140,6 +140,7 @@ class HttpRequest:
         return False
 
     def do(self, dir):
+        # Check and correct directories
         if dir.startswith("."):
             dir = dir[1:]
         elif not dir.startswith("/"):
@@ -148,68 +149,60 @@ class HttpRequest:
             dir = dir[:-1]
         if self.path == "":
             self.path = "/"
-
-        # split_path = os.path.splitdrive(self.path)
-
-        self.path = os.getcwd() + dir + self.path
-
+        # Generate the absolute path
+        abs_path = os.getcwd() + dir + self.path
         # Create a response
         response = HttpResponse(log=self.log)
         try:
             # Check unauthorized access for security reasons
-            if "/.." in self.path:
+            if "/.." in abs_path:
                 response.set_status_code(StatusCode.BAD_REQUEST)
                 response.add_header("Content-Type", "application/json")
                 response.set_data_inline("Access denied!")
-                self.print_log(f'Access denied -> {self.path}', Fore.RED)
+                self.print_log(f'Access denied -> {abs_path}', Fore.RED)
             # --- GET method ---
             elif self.method == Method.GET:
                 # (DIR) Request list of files in the given directory
-                if self.path.endswith("/") and os.path.exists(self.path):
+                if abs_path.endswith("/") and os.path.exists(abs_path):
                     response.set_status_code(StatusCode.OK)
                     response.add_header("Content-Type", "application/json")
-                    files = os.listdir(self.path)
+                    files = os.listdir(abs_path)
                     response.set_data_inline(json.dumps(files))
-                    self.print_log(f'List directory {self.path}: \n{json.dumps(files)}', Fore.BLUE)
+                    self.print_log(f'List directory {abs_path}: \n{json.dumps(files)}', Fore.BLUE)
                 # (FILE) Request a file
-                elif os.path.exists(self.path):
+                elif os.path.exists(abs_path):
                     response.set_status_code(StatusCode.OK)
                     response.add_header("Content-Type", "application/json")
-                    response.set_data_file(self.path)
-                    self.print_log(f'Request file -> {self.path}', Fore.BLUE)
+                    response.set_data_file(abs_path)
+                    self.print_log(f'Request file -> {abs_path}', Fore.BLUE)
                 # (NOT FOUND) The path or file is not found
                 else:
                     response.set_status_code(StatusCode.NOT_FOUND)
                     response.add_header("Content-Type", "application/json")
                     response.set_data_inline("No such file or directory")
-                    self.print_log(f'No such file or directory -> {self.path}', Fore.YELLOW)
+                    self.print_log(f'No such file or directory -> {abs_path}', Fore.YELLOW)
             # --- POST method ---
             elif self.method == Method.POST:
-                # TODO: Handle POST method: create directory if needed and put the data as a file in that directory
-
-                if not os.path.exists(self.path):
-                    print("path \"%s\" not exist!" % self.path)
-                    os.mkdir(self.path)
-                    print("path \"%s\" created!" % self.path)
-                else:
-                    print("path \"%s\" exist!" % self.path)
-
-                # print(self.headers)
-
-                filename = self.path + ".json"
-                filename = filename.replace("/", "\\")
-
+                # Set a sample file name if it was not entered
+                if abs_path.endswith("/"):
+                    abs_path += 'sample.txt'
+                # Extract the base file name
+                cdir = os.path.dirname(abs_path)
+                # Create the directory if does not exist
+                if not os.path.exists(cdir):
+                    self.print_log(f'Path {abs_path} did not exist.', Fore.YELLOW)
+                    os.makedirs(cdir, exist_ok=True)
+                    self.print_log(f'Path {abs_path} was created.', Fore.WHITE)
                 # Lock the path
-                path_lock = LockFile(self.path)
+                path_lock = LockFile(abs_path)
                 path_lock.acquire()
-
-                with open(filename, 'w') as f:
-                    print("path \"%s\" created!" % filename)
+                # Write the data into the file
+                with open(abs_path, 'w') as f:
+                    self.print_log(f'The data is successfully written to {abs_path}', Fore.WHITE)
                     f.write(self.data + "\n")
-
+                # Realease the lock
                 path_lock.release()
                 response.set_status_code(StatusCode.OK)
-
             # --- UNKNOWN method ---
             else:
                 response.set_status_code(StatusCode.BAD_REQUEST)
