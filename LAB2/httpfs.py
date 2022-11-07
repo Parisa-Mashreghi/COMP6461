@@ -52,6 +52,7 @@ def main():
     args = create_parser()
 
     # Create a server socket for the file server
+
     server_sock = create_http_file_server('', args.port, args.dir, args.verbose)
 
 if __name__ == "__main__":

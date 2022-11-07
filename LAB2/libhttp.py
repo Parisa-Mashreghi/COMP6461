@@ -6,6 +6,8 @@ import os
 import json
 from urllib.parse import urlparse
 from colorama import Fore
+from lockfile import LockFile
+
 
 class Method(enum.IntEnum):
     UNKNOWN = 0
@@ -57,7 +59,7 @@ class HttpResponse:
 
         # Add HTTP version and status
         s1 = "HTTP/1.0 " + str(int(self.status)) + \
-            " " + self.get_status_string()
+             " " + self.get_status_string()
 
         # Add headers
         if len(self.data.strip()) != 0:
@@ -126,7 +128,7 @@ class HttpRequest:
         hdrs = head.split("\r\n")
         # Extract the HTTP status code from the first header
         check = int(hdrs[0].split(" ")[1])
-        if 299 < check < 400:                     # A status code between 300 and 399 is recognized redirection response
+        if 299 < check < 400:  # A status code between 300 and 399 is recognized redirection response
             location = ""
             for hdr in hdrs:
                 hdr = hdr.lower()
@@ -146,8 +148,11 @@ class HttpRequest:
             dir = dir[:-1]
         if self.path == "":
             self.path = "/"
+
+        # split_path = os.path.splitdrive(self.path)
+
         self.path = os.getcwd() + dir + self.path
-        
+
         # Create a response
         response = HttpResponse(log=self.log)
         try:
@@ -167,7 +172,7 @@ class HttpRequest:
                     response.set_data_inline(json.dumps(files))
                     self.print_log(f'List directory {self.path}: \n{json.dumps(files)}', Fore.BLUE)
                 # (FILE) Request a file
-                elif os.path.exists(self.path):     
+                elif os.path.exists(self.path):
                     response.set_status_code(StatusCode.OK)
                     response.add_header("Content-Type", "application/json")
                     response.set_data_file(self.path)
@@ -181,7 +186,30 @@ class HttpRequest:
             # --- POST method ---
             elif self.method == Method.POST:
                 # TODO: Handle POST method: create directory if needed and put the data as a file in that directory
+
+                if not os.path.exists(self.path):
+                    print("path \"%s\" not exist!" % self.path)
+                    os.mkdir(self.path)
+                    print("path \"%s\" created!" % self.path)
+                else:
+                    print("path \"%s\" exist!" % self.path)
+
+                # print(self.headers)
+
+                filename = self.path + ".json"
+                filename = filename.replace("/", "\\")
+
+                # Lock the path
+                path_lock = LockFile(self.path)
+                path_lock.acquire()
+
+                with open(filename, 'w') as f:
+                    print("path \"%s\" created!" % filename)
+                    f.write(self.data + "\n")
+
+                path_lock.release()
                 response.set_status_code(StatusCode.OK)
+
             # --- UNKNOWN method ---
             else:
                 response.set_status_code(StatusCode.BAD_REQUEST)
