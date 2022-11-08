@@ -31,4 +31,7 @@ python3 httpc.py get  -v -p 8082 'http://localhost/ptest/readme.txt'
 # Create folder if it does not exist
 python3 httpc.py post -v -p 8082 -h 'Content-Type:application/json' -d '{"Assignment": 1}' 'http://localhost/p1/p2/course.json'
 python3 httpc.py get  -v -p 8082 'http://localhost/p1/p2/course.json'
+
+# Run concurrent test for simultaneous access
+python3 test_concurrent.py
 ```
