@@ -1,0 +1,178 @@
+
+------------------------------------------------------------------------------------
+[1] python3 httpc.py post -h "Content-Type: application/json" -v -d "{"Assignment": 1}" "http://httpbin.org/post"
+********** Request: **********
+POST /post HTTP/1.0 
+Content-Type: application/json
+Host: www.httpbin.org
+Content-Length: 15 
+
+{Assignment: 1}
+
+********** Response: **********
+HTTP/1.1 200 OK
+Date: Sun, 09 Oct 2022 14:54:58 GMT
+Content-Type: application/json
+Content-Length: 355
+Connection: close
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {}, 
+  "data": "{Assignment: 1}", 
+  "files": {}, 
+  "form": {}, 
+  "headers": {
+    "Content-Length": "15", 
+    "Content-Type": "application/json", 
+    "Host": "www.httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-6342e0c2-2fabd7002e181250451a9359"
+  }, 
+  "json": null, 
+  "origin": "142.118.34.45", 
+  "url": "http://www.httpbin.org/post"
+}
+
+
+------------------------------------------------------------------------------------
+[2] python3 httpc.py post -v -h "Content-Type: application/json" -f "data.json" "http://httpbin.org/post"
+********** Request: **********
+POST /post HTTP/1.0 
+Content-Type:  application/json
+Host: www.httpbin.org
+Content-Length: 30 
+
+{
+  "course": "COMP6461", 
+}
+
+
+
+********** Response: **********
+HTTP/1.1 200 OK
+Date: Sun, 09 Oct 2022 14:54:59 GMT
+Content-Type: application/json
+Content-Length: 378
+Connection: close
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {}, 
+  "data": "{\n  \"course\": \"COMP6461\", \n}\n\n", 
+  "files": {}, 
+  "form": {}, 
+  "headers": {
+    "Content-Length": "30", 
+    "Content-Type": "application/json", 
+    "Host": "www.httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-6342e0c3-173ac981228fa15768daac16"
+  }, 
+  "json": null, 
+  "origin": "142.118.34.45", 
+  "url": "http://www.httpbin.org/post"
+}
+
+
+------------------------------------------------------------------------------------
+[3] python3 httpc.py get -v "http://httpbin.org/get?course=networking&assignment=1"
+********** Request: **********
+GET /get HTTP/1.0 
+Host: www.httpbin.org 
+
+
+
+********** Response: **********
+HTTP/1.1 200 OK
+Date: Sun, 09 Oct 2022 14:54:59 GMT
+Content-Type: application/json
+Content-Length: 206
+Connection: close
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {}, 
+  "headers": {
+    "Host": "www.httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-6342e0c3-184981e409d9286c73002409"
+  }, 
+  "origin": "142.118.34.45", 
+  "url": "http://www.httpbin.org/get"
+}
+
+
+------------------------------------------------------------------------------------
+[4] python3 httpc.py get -v -o out.txt "http://httpbin.org/status/301"
+********** Request: **********
+GET /status/301 HTTP/1.0 
+Host: www.httpbin.org 
+
+
+
+********** Response: **********
+HTTP/1.1 301 MOVED PERMANENTLY
+Date: Sun, 09 Oct 2022 14:54:59 GMT
+Content-Length: 0
+Connection: close
+Server: gunicorn/19.9.0
+location: /redirect/1
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+
+
+********** Request: **********
+GET /redirect/1 HTTP/1.0 
+Host: www.httpbin.org 
+
+
+
+********** Response: **********
+HTTP/1.1 302 FOUND
+Date: Sun, 09 Oct 2022 14:54:59 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 215
+Connection: close
+Server: gunicorn/19.9.0
+Location: /get
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>Redirecting...</title>
+<h1>Redirecting...</h1>
+<p>You should be redirected automatically to target URL: <a href="/get">/get</a>.  If not click the link.
+
+********** Request: **********
+GET /get HTTP/1.0 
+Host: www.httpbin.org 
+
+
+
+********** Response: **********
+HTTP/1.1 200 OK
+Date: Sun, 09 Oct 2022 14:54:59 GMT
+Content-Type: application/json
+Content-Length: 206
+Connection: close
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {}, 
+  "headers": {
+    "Host": "www.httpbin.org", 
+    "X-Amzn-Trace-Id": "Root=1-6342e0c3-2583842818c29d6e6e3242d1"
+  }, 
+  "origin": "142.118.34.45", 
+  "url": "http://www.httpbin.org/get"
+}
+
+
+------------------------------------------------------------------------------------
