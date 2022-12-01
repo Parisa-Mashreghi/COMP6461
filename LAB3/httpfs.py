@@ -42,6 +42,7 @@ def create_http_file_server(host, port, dir, log):
 
 def create_arq_file_server(host, port, dir, log):
     server_sock = arqsocket.libarq()
+    server_sock.open_socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     try:
         server_sock.bind((host, port))
         server_sock.listen(20)
@@ -58,7 +59,10 @@ def incoming_connection(sock, host, dir, log):
     if log:
         print(Fore.GREEN + f'\nNew client {host} is connected.' + Fore.RESET)
     try:
-        data = sock.recv(4096)
+        if args.arq:                    ###################### I stopped here ######################
+            data = sock.recvall()
+        else:
+            data = sock.recv(4096)
         request = libhttp.parse_request(data, log)
         if request.is_valid():
             response = request.do(dir)
