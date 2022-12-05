@@ -3,14 +3,16 @@
 
 # Usage
 
-1. Step 1: Run the router on the same or different host
-   See the router's README
+1. Step 1: Run the router after compiling from the source or uncompressing the zip file
+   ./router --port=3000 --drop-rate=0.0 --max-delay=50ms --seed=1
 
 2. Step 2: Run the server
-   python udp_server.py --port 8007
+   python3 httpfs.py -v -p 8007 -d .
 
 3. Step 3: Run the client
-   python udp_client.py --routerhost localhost --routerport 3000 --serverhost localhost --serverport 8007
+   python3 httpc.py get -v -p 8007 'http://localhost/README.md'
+   python3 httpc.py get -v -p 8007 'http://localhost/'
+   python3 httpc.py post -v -p 8007 -h 'Content-Type:application/json' -f 'libhttp.py' 'http://localhost/ptest/exec_post_libhttp.py'
+   python3 test_concurrent.py
 
 
-If you found any issue, please report. Thank you.

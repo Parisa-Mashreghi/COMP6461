@@ -243,7 +243,7 @@ class HttpRequest:
             s4 += f"{cr}{key}: {self.headers[key]}"
 
         # Add data
-        s5 = cr + cr + self.data + cr
+        s5 = cr + cr + str(self.data) + cr
 
         # Construct the request
         req = f'{s1} {s2} {s3} {s4} {s5}'
